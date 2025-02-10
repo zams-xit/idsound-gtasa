@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List id sound</title>
+    <!-- CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans">
+
+    <div class="container mx-auto p-8">
+        <h1 class="text-4xl font-semibold text-center text-blue-400 mb-6">LIST ID SOUND CAR GTA SA </h1>
+
+        <!-- Input Pencarian -->
+        <div class="mb-6 flex justify-center">
+            <input type="text" id="search" placeholder="Search vehicles" 
+            class="w-2/3 p-4 text-gray-900 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            oninput="searchVehicles()">
+        </div>
+
+        <!-- Tabel Kendaraan -->
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-md">
+            <table class="min-w-full text-sm text-gray-300">
+                <thead>
+                    <tr class="border-b border-gray-600">
+                        <th class="py-3 px-4 text-left text-gray-300">Bank </th>
+                        <th class="py-3 px-4 text-left text-gray-300">Vehicles name</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicleList">
+                    <!-- Data kendaraan akan dimasukkan di sini melalui JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Ambil data kendaraan dari URL JSON
+        const apiUrl = "https://idsound-gtasa.vercel.app/data.json";
+
+        // Menyimpan data kendaraan di sini
+        let vehicles = [];
+
+        // Fungsi untuk memuat data kendaraan
+        async function loadData() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                console.log("Data yang diterima:", data); // Menampilkan data untuk analisis
+
+                // Cek apakah data tersebut berisi array atau objek yang memiliki array di dalamnya
+                if (Array.isArray(data)) {
+                    vehicles = data; // Menyimpan data kendaraan
+                    displayVehicles(vehicles); // Menampilkan semua kendaraan
+                } else if (data && data.vehicles && Array.isArray(data.vehicles)) {
+                    vehicles = data.vehicles; // Menyimpan array kendaraan dari properti 'vehicles'
+                    displayVehicles(vehicles); // Menampilkan kendaraan
+                } else {
+                    console.error("Data tidak berformat array atau tidak ada properti kendaraan.");
+                }
+            } catch (error) {
+                console.error("Terjadi kesalahan saat memuat data:", error);
+            }
+        }
+
+        // Fungsi untuk menampilkan kendaraan di tabel
+        function displayVehicles(vehicles) {
+            const vehicleList = document.getElementById("vehicleList");
+            vehicleList.innerHTML = ""; // Bersihkan tabel terlebih dahulu
+
+            // Pastikan kendaraan memiliki properti id dan name
+            vehicles.forEach(vehicle => {
+                if (vehicle.id && vehicle.name) {
+                    const row = document.createElement("tr");
+                    row.classList.add("border-b", "hover:bg-gray-700");
+
+                    const cellId = document.createElement("td");
+                    cellId.classList.add("py-3", "px-4", "text-gray-100");
+                    cellId.textContent = vehicle.id;
+
+                    const cellName = document.createElement("td");
+                    cellName.classList.add("py-3", "px-4", "text-gray-100");
+                    cellName.textContent = vehicle.name;
+
+                    row.appendChild(cellId);
+                    row.appendChild(cellName);
+                    vehicleList.appendChild(row);
+                } else {
+                    console.error("Data kendaraan tidak valid:", vehicle);
+                }
+            });
+        }
+
+        // Fungsi pencarian kendaraan
+        function searchVehicles() {
+            const searchInput = document.getElementById("search").value.toLowerCase();
+            const filteredVehicles = vehicles.filter(vehicle => 
+                vehicle.name.toLowerCase().includes(searchInput) || 
+                vehicle.id.toString().includes(searchInput)
+            );
+            displayVehicles(filteredVehicles); // Tampilkan kendaraan yang sesuai dengan pencarian
+        }
+
+        // Muat data saat halaman dimuat
+        window.onload = loadData;
+    </script>
+
+</body>
+</html>
